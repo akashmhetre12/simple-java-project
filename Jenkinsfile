@@ -24,7 +24,7 @@ pipeline {
         )
         string(
             name: 'BASE_AMI_ID',
-            defaultValue: 'ami-096f7a2ad450e0452',
+            defaultValue: 'ami-0748e05f6f49a339a',
             description: 'Base OS AMI (Java + systemd unit pre-baked) to launch the builder instance from'
         )
         string(
@@ -132,7 +132,7 @@ pipeline {
                 -DrepositoryId=nexus \
                 -Dfile=${JAR_FILE} \
                 -DgroupId=com.myapp \
-                -DartifactId=simple-java-app \
+                -DartifactId=myapp \
                 -Dversion=${BUILD_NUMBER} \
                 -Dpackaging=jar
             """
