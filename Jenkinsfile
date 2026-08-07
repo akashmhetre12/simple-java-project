@@ -109,22 +109,22 @@ pipeline {
         }
 
         stage('Upload to Nexus') {
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'nexus-credentials',
-            usernameVariable: 'NEXUS_USER',
-            passwordVariable: 'NEXUS_PASS'
-        )]) {
-            writeFile file: 'nexus-settings.xml', text: """
-                <settings>
-                  <servers>
-                    <server>
-                      <id>nexus</id>
-                      <username>${NEXUS_USER}</username>
-                      <password>${NEXUS_PASS}</password>
-                    </server>
-                  </servers>
-                </settings>
+             steps {
+                withCredentials([usernamePassword(
+                credentialsId: 'nexus-credentials',
+                usernameVariable: 'NEXUS_USER',
+                passwordVariable: 'NEXUS_PASS'
+                )]) {
+                    writeFile file: 'nexus-settings.xml', text: """
+                        <settings>
+                        <servers>
+                        <server>
+                            <id>nexus</id>
+                            <username>${NEXUS_USER}</username>
+                             <password>${NEXUS_PASS}</password>
+                        </server>
+                    </servers>
+                    </settings>
             """
             sh """
                 mvn -B -s nexus-settings.xml deploy:deploy-file \
