@@ -24,7 +24,7 @@ pipeline {
         )
         string(
             name: 'BASE_AMI_ID',
-            defaultValue: 'ami-0e1b1b480757d116f',
+            defaultValue: 'ami-096f7a2ad450e0452',
             description: 'Base OS AMI (Java + systemd unit pre-baked) to launch the builder instance from'
         )
         string(
