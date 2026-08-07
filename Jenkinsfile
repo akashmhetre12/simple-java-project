@@ -228,7 +228,7 @@ pipeline {
                     sudo mv /tmp/simple-java-app-1.0.0.jar /opt/simple-java-app/simple-java-app-1.0.0.jar
                     sudo systemctl enable simple-java-app
                     sudo systemctl start simple-java-app
-                    sleep 8
+                    sleep 15
                     curl -f http://localhost:8080/health || curl -f http://localhost:8081/
                     '
                     """
