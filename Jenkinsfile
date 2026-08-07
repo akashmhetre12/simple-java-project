@@ -230,6 +230,7 @@ pipeline {
                     sudo systemctl start simple-java-app
                     sleep 15
                     curl http://${env.BUILDER_INSTANCE_IP}:8081
+                    echo "${env.BUILDER_INSTANCE_IP}"
                     curl -f http://localhost:8080/health || curl -f http://localhost:8081/
                     '
                     """
