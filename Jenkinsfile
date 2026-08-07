@@ -91,7 +91,7 @@ pipeline {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                         -Dsonar.projectKey=test \
-                        -Dsonar.host.url=http://65.2.81.22:9000 \
+                        -Dsonar.host.url=http://13.127.6.25:9000 \
                         -Dsonar.login=${APP_NAME}-${params.ENVIRONMENT}"
                 }
             }
