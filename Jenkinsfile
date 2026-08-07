@@ -238,19 +238,24 @@ pipeline {
             }
         }
 
-       stage('Stop App Before Imaging') {
-            steps {
-                sshagent(credentials: ['app-deploy-ssh-key']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${env.BUILDER_INSTANCE_IP} '
-                        sudo systemctl stop simple-java-app
-                        sync
-                        sync
-                        '
-                    """
-                }
-            }
+      stage('Stop App Before Imaging') {
+    steps {
+        sshagent(credentials: ['app-deploy-ssh-key']) {
+            sh """
+                ssh -o StrictHostKeyChecking=no ubuntu@${env.BUILDER_INSTANCE_IP} '
+                sudo systemctl stop simple-java-app
+                echo "--- verifying jar before imaging ---"
+                ls -la /opt/simple-java-app/
+                md5sum /opt/simple-java-app/simple-java-app-1.0.0.jar
+                df -h /opt
+                mount | grep /opt
+                sync
+                sync
+                '
+            """
         }
+    }
+}
  
         stage('Bake AMI') {
             steps {
