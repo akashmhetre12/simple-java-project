@@ -52,7 +52,7 @@ pipeline {
     environment {
         AWS_REGION     = 'ap-south-1'
         NEXUS_URL      = 'http://13.127.6.25:8081'
-        NEXUS_REPO     = 'maven-releases'   // confirm this matches the repo name in Nexus
+        NEXUS_REPO     = 'maven-releases1'   // confirm this matches the repo name in Nexus
         SONARQUBE_ENV  = 'MySonarQubeServer'
         APP_NAME       = 'simple-java-project'
         JAR_FILE       = 'target/simple-java-app-1.0.0.jar'
