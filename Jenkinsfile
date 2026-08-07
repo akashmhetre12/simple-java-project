@@ -89,7 +89,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh "mvn -B sonar:sonar -Dsonar.projectKey=${APP_NAME}-${params.ENVIRONMENT}"
+                    sh "mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                        -Dsonar.projectKey=test \
+                        -Dsonar.host.url=http://65.2.81.22:9000 \
+                        -Dsonar.login=${APP_NAME}-${params.ENVIRONMENT}"
                 }
             }
         }
