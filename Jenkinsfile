@@ -132,7 +132,7 @@ pipeline {
                 -DrepositoryId=nexus \
                 -Dfile=${JAR_FILE} \
                 -DgroupId=com.myapp \
-                -DartifactId=myapp \
+                -DartifactId=simple-java-app \
                 -Dversion=${BUILD_NUMBER} \
                 -Dpackaging=jar
             """
