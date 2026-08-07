@@ -52,7 +52,7 @@ pipeline {
     environment {
         AWS_REGION     = 'ap-south-1'
         NEXUS_URL      = 'http://13.127.6.25:8081'
-        NEXUS_REPO     = 'maven-releases1'   // confirm this matches the repo name in Nexus
+        NEXUS_REPO     = 'maven-releases'   // confirm this matches the repo name in Nexus
         SONARQUBE_ENV  = 'MySonarQubeServer'
         APP_NAME       = 'simple-java-project'
         JAR_FILE       = 'target/simple-java-app-1.0.0.jar'
@@ -109,27 +109,37 @@ pipeline {
         }
 
         stage('Upload to Nexus') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-credentials',
-                    usernameVariable: 'NEXUS_USER',
-                    passwordVariable: 'NEXUS_PASS'
-                )]) {
-                    sh """
-                        mvn -B deploy:deploy-file \
-                        -Durl=${NEXUS_URL}/repository/${NEXUS_REPO}/ \
-                        -DrepositoryId=nexus \
-                        -Dfile=${JAR_FILE} \
-                        -DgroupId=com.myapp \
-                        -DartifactId=myapp \
-                        -Dversion=${BUILD_NUMBER} \
-                        -Dpackaging=jar \
-                        -Dusername=${NEXUS_USER} \
-                        -Dpassword=${NEXUS_PASS}
-                    """
-                }
-            }
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'nexus-credentials',
+            usernameVariable: 'NEXUS_USER',
+            passwordVariable: 'NEXUS_PASS'
+        )]) {
+            writeFile file: 'nexus-settings.xml', text: """
+                <settings>
+                  <servers>
+                    <server>
+                      <id>nexus</id>
+                      <username>${NEXUS_USER}</username>
+                      <password>${NEXUS_PASS}</password>
+                    </server>
+                  </servers>
+                </settings>
+            """
+            sh """
+                mvn -B -s nexus-settings.xml deploy:deploy-file \
+                -Durl=${NEXUS_URL}/repository/${NEXUS_REPO}/ \
+                -DrepositoryId=nexus \
+                -Dfile=${JAR_FILE} \
+                -DgroupId=com.myapp \
+                -DartifactId=myapp \
+                -Dversion=${BUILD_NUMBER} \
+                -Dpackaging=jar
+            """
+            sh 'rm -f nexus-settings.xml'
         }
+    }
+}
 
         stage('Launch Builder Instance') {
             steps {
