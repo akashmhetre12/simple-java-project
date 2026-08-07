@@ -238,23 +238,25 @@ pipeline {
             }
         }
 
-        stage('Stop App Before Imaging') {
+       stage('Stop App Before Imaging') {
             steps {
                 sshagent(credentials: ['app-deploy-ssh-key']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${env.BUILDER_INSTANCE_IP} '
                         sudo systemctl stop simple-java-app
+                        sync
+                        sync
                         '
                     """
                 }
             }
         }
-
+ 
         stage('Bake AMI') {
             steps {
                 script {
                     def amiName = "${APP_NAME}-${params.ENVIRONMENT}-${env.BUILD_NUMBER}"
-
+ 
                     env.NEW_AMI_ID = sh(
                         script: """
                             aws ec2 create-image \
@@ -262,18 +264,19 @@ pipeline {
                               --instance-id ${env.BUILDER_INSTANCE_ID} \
                               --name "${amiName}" \
                               --description "Built from Jenkins build #${env.BUILD_NUMBER}, branch ${params.BRANCH}" \
-                              --no-reboot \
                               --tag-specifications "ResourceType=image,Tags=[{Key=Name,Value=${amiName}},{Key=Environment,Value=${params.ENVIRONMENT}},{Key=BuildNumber,Value=${env.BUILD_NUMBER}}]" \
                               --query "ImageId" \
                               --output text
                         """,
                         returnStdout: true
                     ).trim()
-
+ 
                     echo "Created AMI: ${env.NEW_AMI_ID}"
                 }
             }
         }
+
+        
 
         stage('Wait for AMI Available') {
             steps {
