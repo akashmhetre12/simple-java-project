@@ -229,7 +229,7 @@ pipeline {
                     sudo systemctl enable simple-java-app
                     sudo systemctl start simple-java-app
                     sleep 8
-                    curl -f http://localhost:8080/health || curl -f http://localhost:8080/
+                    curl -f http://localhost:8080/health || curl -f http://localhost:8081/
                     '
                     """
                 }
