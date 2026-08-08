@@ -14,7 +14,7 @@ public class SimpleJavaApplication {
 
     @GetMapping("/")
     public String home() {
-        return "Application deployed successfully using Jenkins!";
+        return "Hey this is new version of the app";
     }
 
     @GetMapping("/health")
