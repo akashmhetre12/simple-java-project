@@ -387,45 +387,67 @@ pipeline {
             }
         }
 
-        stage('Wait for Instance Refresh') {
-            when {
-                expression { params.TRIGGER_ASG_REFRESH }
+        stage('Terminate Builder Instance') {
+    steps {
+        script {
+            if (env.BUILDER_INSTANCE_ID?.trim()) {
+                echo "Terminating builder instance ${env.BUILDER_INSTANCE_ID}"
+                sh """
+                    aws ec2 terminate-instances \
+                      --region ${AWS_REGION} \
+                      --instance-ids ${env.BUILDER_INSTANCE_ID} || true
+                """
+                sh """
+                    aws ec2 wait instance-terminated \
+                      --region ${AWS_REGION} \
+                      --instance-ids ${env.BUILDER_INSTANCE_ID} || true
+                """
+            } else {
+                echo "No builder instance ID found, skipping termination."
             }
-            steps {
-                timeout(time: 30, unit: 'MINUTES') {
-                    script {
-                        def status = ''
-                        while (!(status in ['Successful', 'Failed', 'Cancelled'])) {
-                            status = sh(
-                                script: """
-                                    aws autoscaling describe-instance-refreshes \
-                                      --region ${AWS_REGION} \
-                                      --auto-scaling-group-name ${env.ASG_NAME} \
-                                      --instance-refresh-ids ${env.REFRESH_ID} \
-                                      --query "InstanceRefreshes[0].Status" \
-                                      --output text
-                                """,
-                                returnStdout: true
-                            ).trim()
-                            echo "Instance refresh status: ${status}"
-                            if (!(status in ['Successful', 'Failed', 'Cancelled'])) {
-                                sleep 15
-                            }
-                        }
-                        if (status != 'Successful') {
-                            error "Instance refresh ended with status: ${status}"
-                        }
+        }
+    }
+}
+
+stage('Wait for Instance Refresh') {
+    when {
+        expression { params.TRIGGER_ASG_REFRESH }
+    }
+    steps {
+        timeout(time: 30, unit: 'MINUTES') {
+            script {
+                def status = ''
+                while (!(status in ['Successful', 'Failed', 'Cancelled'])) {
+                    status = sh(
+                        script: """
+                            aws autoscaling describe-instance-refreshes \
+                              --region ${AWS_REGION} \
+                              --auto-scaling-group-name ${env.ASG_NAME} \
+                              --instance-refresh-ids ${env.REFRESH_ID} \
+                              --query "InstanceRefreshes[0].Status" \
+                              --output text
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    echo "${new Date()} - Instance refresh status: ${status}"
+                    if (!(status in ['Successful', 'Failed', 'Cancelled'])) {
+                        sleep 15
                     }
+                }
+                if (status != 'Successful') {
+                    error "Instance refresh ended with status: ${status}"
                 }
             }
         }
     }
+}
+    } // end stages
 
     post {
         always {
             script {
                 if (env.BUILDER_INSTANCE_ID?.trim()) {
-                    echo "Terminating builder instance ${env.BUILDER_INSTANCE_ID}"
+                    echo "Post-block safety check: ensuring builder instance ${env.BUILDER_INSTANCE_ID} is terminated"
                     sh """
                         aws ec2 terminate-instances \
                           --region ${AWS_REGION} \
@@ -442,3 +464,5 @@ pipeline {
         }
     }
 }
+
+       
